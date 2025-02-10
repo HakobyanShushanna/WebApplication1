@@ -40,7 +40,7 @@ namespace WebApplication1.Migrations
                     b.ToTable("AuthorModelBookModel");
                 });
 
-            modelBuilder.Entity("DemoBookStore.Models.AuthorModel", b =>
+            modelBuilder.Entity("WebApplication1.Models.AuthorModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -72,7 +72,7 @@ namespace WebApplication1.Migrations
                     b.ToTable("AuthorModel");
                 });
 
-            modelBuilder.Entity("DemoBookStore.Models.AwardModel", b =>
+            modelBuilder.Entity("WebApplication1.Models.AwardModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -101,7 +101,7 @@ namespace WebApplication1.Migrations
                     b.ToTable("AwardModel");
                 });
 
-            modelBuilder.Entity("DemoBookStore.Models.BookModel", b =>
+            modelBuilder.Entity("WebApplication1.Models.BookModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -138,7 +138,7 @@ namespace WebApplication1.Migrations
                     b.ToTable("BookModel");
                 });
 
-            modelBuilder.Entity("DemoBookStore.Models.ReviewModel", b =>
+            modelBuilder.Entity("WebApplication1.Models.ReviewModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -172,7 +172,7 @@ namespace WebApplication1.Migrations
                     b.ToTable("ReviewModel");
                 });
 
-            modelBuilder.Entity("DemoBookStore.Models.UserModel", b =>
+            modelBuilder.Entity("WebApplication1.Models.UserModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -215,22 +215,22 @@ namespace WebApplication1.Migrations
 
             modelBuilder.Entity("AuthorModelBookModel", b =>
                 {
-                    b.HasOne("DemoBookStore.Models.AuthorModel", null)
+                    b.HasOne("WebApplication1.Models.AuthorModel", null)
                         .WithMany()
                         .HasForeignKey("AuthorsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DemoBookStore.Models.BookModel", null)
+                    b.HasOne("WebApplication1.Models.BookModel", null)
                         .WithMany()
                         .HasForeignKey("BooksId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DemoBookStore.Models.AwardModel", b =>
+            modelBuilder.Entity("WebApplication1.Models.AwardModel", b =>
                 {
-                    b.HasOne("DemoBookStore.Models.AuthorModel", "Author")
+                    b.HasOne("WebApplication1.Models.AuthorModel", "Author")
                         .WithMany("Awards")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -239,15 +239,15 @@ namespace WebApplication1.Migrations
                     b.Navigation("Author");
                 });
 
-            modelBuilder.Entity("DemoBookStore.Models.ReviewModel", b =>
+            modelBuilder.Entity("WebApplication1.Models.ReviewModel", b =>
                 {
-                    b.HasOne("DemoBookStore.Models.BookModel", "Book")
+                    b.HasOne("WebApplication1.Models.BookModel", "Book")
                         .WithMany("Reviews")
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DemoBookStore.Models.UserModel", "User")
+                    b.HasOne("WebApplication1.Models.UserModel", "User")
                         .WithMany("Reviews")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -258,29 +258,29 @@ namespace WebApplication1.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DemoBookStore.Models.UserModel", b =>
+            modelBuilder.Entity("WebApplication1.Models.UserModel", b =>
                 {
-                    b.HasOne("DemoBookStore.Models.AwardModel", null)
+                    b.HasOne("WebApplication1.Models.AwardModel", null)
                         .WithMany("Funders")
                         .HasForeignKey("AwardModelId");
                 });
 
-            modelBuilder.Entity("DemoBookStore.Models.AuthorModel", b =>
+            modelBuilder.Entity("WebApplication1.Models.AuthorModel", b =>
                 {
                     b.Navigation("Awards");
                 });
 
-            modelBuilder.Entity("DemoBookStore.Models.AwardModel", b =>
+            modelBuilder.Entity("WebApplication1.Models.AwardModel", b =>
                 {
                     b.Navigation("Funders");
                 });
 
-            modelBuilder.Entity("DemoBookStore.Models.BookModel", b =>
+            modelBuilder.Entity("WebApplication1.Models.BookModel", b =>
                 {
                     b.Navigation("Reviews");
                 });
 
-            modelBuilder.Entity("DemoBookStore.Models.UserModel", b =>
+            modelBuilder.Entity("WebApplication1.Models.UserModel", b =>
                 {
                     b.Navigation("Reviews");
                 });

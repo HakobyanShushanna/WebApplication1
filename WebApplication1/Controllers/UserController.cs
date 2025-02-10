@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using DemoBookStore.Models;
+using WebApplication1.Models;
 using WebApplication1.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace WebApplication1.Controllers
 {
     public class UserController : Controller
     {
         private readonly WebApplication1Context _context;
-
-        public UserController(WebApplication1Context context)
+        private readonly SignInManager<UserModel> _signInManager;
+        public UserController(WebApplication1Context context, SignInManager<UserModel> signInManager)
         {
             _context = context;
+            _signInManager = signInManager;
         }
 
         // GET: User
@@ -47,6 +44,34 @@ namespace WebApplication1.Controllers
         public IActionResult Create()
         {
             return View();
+        }
+
+        // GET
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        // POST
+        [HttpPost]
+        public async Task<IActionResult> Login(UserModel userModel)
+        {
+            var user = SearchByEmail(userModel.Email);
+            if(user != null)
+            {
+                var result = await _signInManager.PasswordSignInAsync(user.Email, user.Password, false, false);
+
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Email or Password is incorrect");
+                    return View(userModel);
+                }
+            }
+            return View(userModel);
         }
 
         // POST: User/Create
@@ -152,6 +177,11 @@ namespace WebApplication1.Controllers
         private bool UserModelExists(int id)
         {
             return _context.UserModel.Any(e => e.Id == id);
+        }
+
+        private UserModel? SearchByEmail(string email)
+        {
+            return _context.UserModel.FirstOrDefault(e => e.Email == email);
         }
     }
 }

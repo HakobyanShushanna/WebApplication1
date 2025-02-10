@@ -1,4 +1,4 @@
-﻿namespace DemoBookStore.Models
+﻿namespace WebApplication1.Models
 {
     public class AuthorModel:Person
     {

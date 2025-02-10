@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using DemoBookStore.Models;
+using WebApplication1.Models;
 using WebApplication1.Data;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Authorization;

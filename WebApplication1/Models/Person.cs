@@ -1,6 +1,8 @@
-﻿namespace DemoBookStore.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace WebApplication1.Models
 {
-    public class Person
+    public class Person:IdentityUser
     {
         public int Id { get; set; }
         public string Firstname { get; set; }
