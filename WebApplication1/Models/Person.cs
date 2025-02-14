@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication1.Models
 {
     public class Person:IdentityUser
     {
-        public int Id { get; set; }
+        [Required]
         public string Firstname { get; set; }
+        [Required]
         public string Lastname { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
     }
 }

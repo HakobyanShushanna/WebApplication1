@@ -9,12 +9,18 @@ namespace WebApplication1.Controllers
     public class UserController : Controller
     {
         private readonly WebApplication1Context _context;
+        private readonly UserManager<UserModel> _userManager;
         private readonly SignInManager<UserModel> _signInManager;
-        public UserController(WebApplication1Context context, SignInManager<UserModel> signInManager)
+        private readonly PasswordHasher<UserModel> _passwordHasher;
+
+        public UserController(WebApplication1Context context, UserManager<UserModel> userManager, SignInManager<UserModel> signInManager, PasswordHasher<UserModel> passwordHasher)
         {
             _context = context;
+            _userManager = userManager;
             _signInManager = signInManager;
+            _passwordHasher = passwordHasher;
         }
+
 
         // GET: User
         public async Task<IActionResult> Index()
@@ -23,21 +29,21 @@ namespace WebApplication1.Controllers
         }
 
         // GET: User/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var userModel = await _context.UserModel
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (userModel == null)
+            var model = await _context.UserModel.FirstOrDefaultAsync(m => m.Id == id);
+
+            if (model == null)
             {
                 return NotFound();
             }
 
-            return View(userModel);
+            return View(model);
         }
 
         // GET: User/Create
@@ -52,14 +58,21 @@ namespace WebApplication1.Controllers
             return View();
         }
 
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login", "User");
+        }
+
         // POST
         [HttpPost]
-        public async Task<IActionResult> Login(UserModel userModel)
+        public async Task<IActionResult> Login(string email, string password)
         {
-            var user = SearchByEmail(userModel.Email);
-            if(user != null)
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user != null)
             {
-                var result = await _signInManager.PasswordSignInAsync(user.Email, user.Password, false, false);
+                var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
 
                 if (result.Succeeded)
                 {
@@ -67,11 +80,15 @@ namespace WebApplication1.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Email or Password is incorrect");
-                    return View(userModel);
+                    ModelState.AddModelError("", "Invalid email or Password.");
                 }
             }
-            return View(userModel);
+            else
+            {
+                ModelState.AddModelError("", "User Not Found.");
+            }
+
+            return View();
         }
 
         // POST: User/Create
@@ -79,13 +96,41 @@ namespace WebApplication1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Age,Address,Id,Firstname,Lastname,Email,Password")] UserModel userModel)
+        public async Task<IActionResult> Create([Bind("Age,Address,Id,Firstname,Lastname,Email,Password")] UserModel userModel, string password)
         {
+            userModel.LockoutEnabled = false;
+            userModel.NormalizedEmail = _userManager.NormalizeEmail(userModel.Email);
+            userModel.NormalizedUserName = userModel.Email;
+            userModel.PasswordHash = _passwordHasher.HashPassword(userModel, password);
+
+
+
             if (ModelState.IsValid)
             {
-                _context.Add(userModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var user = new UserModel
+                {
+                    UserName = userModel.Email,
+                    Email = userModel.Email,
+                    Firstname = userModel.Firstname,
+                    Lastname = userModel.Lastname,
+                    Age = userModel.Age,
+                    Address = userModel.Address,
+                };
+
+                var result = await _userManager.CreateAsync(user, password);
+
+                if (result.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                }
             }
             return View(userModel);
         }
@@ -111,7 +156,7 @@ namespace WebApplication1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Age,Address,Id,Firstname,Lastname,Email,Password")] UserModel userModel)
+        public async Task<IActionResult> Edit(string id, [Bind("Age,Address,Id,Firstname,Lastname,Email,Password")] UserModel userModel)
         {
             if (id != userModel.Id)
             {
@@ -122,12 +167,25 @@ namespace WebApplication1.Controllers
             {
                 try
                 {
-                    _context.Update(userModel);
+                    var existingUser = await _context.UserModel.FindAsync(id);
+
+                    if (existingUser == null)
+                    {
+                        return NotFound();
+                    }
+
+                    existingUser.Firstname = userModel.Firstname;
+                    existingUser.Lastname = userModel.Lastname;
+                    existingUser.Email = userModel.Email;
+                    existingUser.Age = userModel.Age;
+                    existingUser.Address = userModel.Address;
+
+                    _context.Update(existingUser);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!UserModelExists(userModel.Id))
+                    if (!UserModelExists(id))
                     {
                         return NotFound();
                     }
@@ -138,14 +196,15 @@ namespace WebApplication1.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             return View(userModel);
         }
 
         // GET: User/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(string id)
         {
-            if (id == null)
-            {
+            if (string.IsNullOrEmpty(id))
+                {
                 return NotFound();
             }
 
@@ -174,7 +233,7 @@ namespace WebApplication1.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool UserModelExists(int id)
+        private bool UserModelExists(string id)
         {
             return _context.UserModel.Any(e => e.Id == id);
         }
