@@ -33,7 +33,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // Ensure this is added to enable Identity middleware.
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

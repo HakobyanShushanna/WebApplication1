@@ -11,14 +11,12 @@ namespace WebApplication1.Controllers
         private readonly WebApplication1Context _context;
         private readonly UserManager<UserModel> _userManager;
         private readonly SignInManager<UserModel> _signInManager;
-        private readonly PasswordHasher<UserModel> _passwordHasher;
 
-        public UserController(WebApplication1Context context, UserManager<UserModel> userManager, SignInManager<UserModel> signInManager, PasswordHasher<UserModel> passwordHasher)
+        public UserController(WebApplication1Context context, UserManager<UserModel> userManager, SignInManager<UserModel> signInManager)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
-            _passwordHasher = passwordHasher;
         }
 
 
@@ -101,8 +99,9 @@ namespace WebApplication1.Controllers
             userModel.LockoutEnabled = false;
             userModel.NormalizedEmail = _userManager.NormalizeEmail(userModel.Email);
             userModel.NormalizedUserName = userModel.Email;
-            userModel.PasswordHash = _passwordHasher.HashPassword(userModel, password);
+            userModel.PasswordHash = password;
 
+            ModelState.Remove("Reviews");
 
 
             if (ModelState.IsValid)
